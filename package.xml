@@ -18,6 +18,9 @@
   <exec_depend>rospy</exec_depend>
   <exec_depend>ur_description</exec_depend>
   <exec_depend>ur_gazebo</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>robotiq_2f_140_gripper_visualization</exec_depend>
+  <exec_depend>roboticsgroup_upatras_gazebo_plugins</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

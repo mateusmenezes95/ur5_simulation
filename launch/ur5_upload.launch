@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="limited" default="false" doc="If true, limits joint range [-PI, PI] on all joints." />
+  <arg name="ur5_transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+  <arg name="eef_transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+
+  <param unless="$(arg limited)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find ur5_simulation)/urdf/ur5_robotiq_eef.xacro' ur5_transmission_hw_interface:=$(arg ur5_transmission_hw_interface) eef_transmission_hw_interface:=$(arg eef_transmission_hw_interface)" />
+  <param if="$(arg limited)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find ur_description)/urdf/ur5_joint_limited_robot.urdf.xacro' transmission_hw_interface:=$(arg ur5_transmission_hw_interface)" />
+</launch>

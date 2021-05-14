@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+  <!-- common stuff -->
+  <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
+
+  <!-- include macros for UR5 and the end effector model -->
+  <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
+  <xacro:include filename="$(find robotiq_2f_140_gripper_visualization)/urdf/robotiq_arg2f_140_model_macro.xacro" />
+
+
+  <xacro:macro name="ur5_with_eef" params="prefix 
+    ur5_transmission_hw_interface:=hardware_interface/PositionJointInterface
+    eef_transmission_hw_interface:=hardware_interface/PositionJointInterface">
+
+    <!-- instantiate UR5 and eef model -->
+    <xacro:ur5_robot prefix="" joint_limited="false" transmission_hw_interface="${ur5_transmission_hw_interface}"/>
+    <xacro:robotiq_arg2f_140 prefix="" robotiq_transmission_hw_interface="${eef_transmission_hw_interface}"/>
+
+    <!-- attach eef to UR5 model -->
+    <!-- Note: this assumes that the 'my_eef' macro defines a 'base_link'
+         link which is the start of it's kinematic chain (if any) -->
+    <joint name="${prefix}robot_flange-${prefix}ee_link" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="tool0" />
+      <child link="robotiq_arg2f_base_link" />
+    </joint>
+
+    <link name="world" />
+
+    <joint name="world_joint" type="fixed">
+      <parent link="world" />
+      <child link = "base_link" />
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+    </joint>
+
+  </xacro:macro>
+</robot>

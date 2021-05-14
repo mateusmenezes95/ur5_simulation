@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<robot name="ur5" xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:arg name="ur5_transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+  <xacro:arg name="eef_transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+
+
+  <xacro:include filename="$(find ur5_simulation)/urdf/ur5_robotiq_eef_macro.xacro"/>
+  <xacro:ur5_with_eef prefix=""
+    ur5_transmission_hw_interface="$(arg ur5_transmission_hw_interface)"
+    eef_transmission_hw_interface="$(arg eef_transmission_hw_interface)"/>
+</robot>

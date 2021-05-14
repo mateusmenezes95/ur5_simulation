@@ -3,10 +3,13 @@
   <include file="$(find ur5_simulation)/launch/bench_test_world.launch"/>
 
   <arg name="limited" default="false"  doc="If true, limits joint range [-PI, PI] on all joints." />
+  <arg name="controller_type" default="position"  doc="CHoose for effort or position" />
 
   <!-- send robot urdf to param server -->
-  <include file="$(find ur_description)/launch/ur5_upload.launch">
+  <include file="$(find ur5_simulation)/launch/ur5_upload.launch">
     <arg name="limited" value="$(arg limited)"/>
+    <arg name="ur5_transmission_hw_interface" value="hardware_interface/PositionJointInterface"/>
+    <arg name="eef_transmission_hw_interface" value="hardware_interface/PositionJointInterface"/>
   </include>
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
@@ -17,6 +20,9 @@
   <!-- start this controller -->
   <rosparam file="$(find ur_gazebo)/controller/arm_controller_ur5.yaml" command="load"/>
   <node name="joint_group_position_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
+
+  <rosparam file="$(find ur5_simulation)/config/gripper_controllers.yaml" command="load"/>
+  <node name="finger_joint_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn gripper_$(arg controller_type)_controller" respawn="false" output="screen"/>
 
   <!-- load other controllers -->
   <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load joint_group_position_controller" />
