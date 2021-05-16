@@ -2,9 +2,9 @@
 
 import rospy
 from ur5_simulation.joint_controller import JointController
+import ur5_simulation.chart_generation as cg
 import numpy as np
 import time
-from matplotlib import pyplot as plt
 
 if __name__ == '__main__':
     rospy.init_node('joints_controller')
@@ -70,28 +70,8 @@ if __name__ == '__main__':
     rospy.loginfo('Forward kinematic maximum errors: %s' % np.round(forward_kinematic_errors, decimals=2))
     rospy.loginfo('Inverse kinematic maximum errors: %s' % np.round(inverse_kinematic_errors, decimals=2))
 
-    x = np.arange(len(joints_set_name))  # the label locations
-    width = 0.3  # the width of the bars
-
-    fig, ax = plt.subplots()
-    rects1 = ax.bar(x - (width / 2), forward_kinematic_errors, width, label='Cinematica direta', color='orange')
-    rects2 = ax.bar(x + (width / 2), inverse_kinematic_errors, width, label='Cinematica inversa', color='steelblue')
-
-    ax.set_xlabel('Conjunto de juntas')
-    ax.set_ylabel('Erro [m]')
-    ax.set_title('Maximos erros dos calculos de cinematica direta e inversa')
-    ax.set_xticks(x)
-    ax.set_xticklabels(joints_set_name)
-    ax.legend()
-
-    def autolabel(rects):
-        for rect in rects:
-            height = rect.get_height()
-            ax.text(rect.get_x() + rect.get_width()/2., 1.02*height, '%.3f' % height, ha='center', va='bottom')
-
-    autolabel(rects1)
-    autolabel(rects2)
-
-    fig.tight_layout()
-
-    plt.show()
+    cg.generate_diference_between_kinematics_computation(
+        joints_set_name,
+        forward_kinematic_errors,
+        inverse_kinematic_errors
+    )
