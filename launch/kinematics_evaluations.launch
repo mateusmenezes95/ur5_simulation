@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="joints_controller_node" pkg="ur5_simulation" type="joints_controller_node.py" output="screen">
+    <rosparam file="$(find ur5_simulation)/config/arm_kinematics.yaml" command="load"/>
+  </node>
+</launch>

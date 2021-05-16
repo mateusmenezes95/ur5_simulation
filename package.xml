@@ -9,11 +9,14 @@
   <license>MIT</license>
 
   <buildtool_depend>catkin</buildtool_depend>
+
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
+
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>ur_description</build_export_depend>
+
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>ur_description</exec_depend>
@@ -21,11 +24,11 @@
   <exec_depend>xacro</exec_depend>
   <exec_depend>robotiq_2f_140_gripper_visualization</exec_depend>
   <exec_depend>roboticsgroup_upatras_gazebo_plugins</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>trajectory_msgs</exec_depend>
+  <exec_depend>joint_controller</exec_depend>
 
-
-  <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <!-- Other tools can request additional information be placed here -->
-
   </export>
 </package>

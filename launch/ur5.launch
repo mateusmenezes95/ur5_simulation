@@ -27,7 +27,7 @@
   <!-- load other controllers -->
   <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load joint_group_position_controller" />
 
-  <node pkg="tf" type="static_transform_publisher" name="base_link_new_base_linkbroadcaster" args="0 0 0 3.14 0 0 base_link link0 20" />
+  <node pkg="tf" type="static_transform_publisher" name="base_link_new_base_linkbroadcaster" args="0 0 0 3.14 0 0 base_link dh_base_link 20" />
   <node pkg="tf" type="static_transform_publisher" name="shoulder_link1_broadcaster" args="0 0 0 3.14 0 0 shoulder_link link1 20" />
   <node pkg="tf" type="static_transform_publisher" name="shoulder_link2_broadcaster" args="0 0 0 3.14 0 1.57 shoulder_link link2 20" />
   <node pkg="tf" type="static_transform_publisher" name="forearm_link3_broadcaster" args="0 0 0 1.57 1.57 0 forearm_link link3 20" />
@@ -35,7 +35,7 @@
   <node pkg="tf" type="static_transform_publisher" name="wrist_3_link_link5_broadcaster" args="0 0 0 0 0 0 wrist_3_link link5 20" />
   <node pkg="tf" type="static_transform_publisher" name="ee_link_link6_broadcaster" args="0 0 0 -1.57 0 -1.57 ee_link link6 20" />
 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ur5_simulation)/config/ur5.rviz" required="true" />
-  <node name="rqt_joint_trajectory_controller" pkg="rqt_joint_trajectory_controller" type="rqt_joint_trajectory_controller" required="true" output="screen"/>
-
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ur5_simulation)/config/ur5.rviz" required="true" /> -->
+  <!-- <node name="rqt_joint_trajectory_controller" pkg="rqt_joint_trajectory_controller" type="rqt_joint_trajectory_controller" required="true" output="screen"/> -->
+  
 </launch>
