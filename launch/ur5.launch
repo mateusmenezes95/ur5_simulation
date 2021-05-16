@@ -4,6 +4,8 @@
 
   <arg name="limited" default="false"  doc="If true, limits joint range [-PI, PI] on all joints." />
   <arg name="controller_type" default="position"  doc="CHoose for effort or position" />
+  <arg name="open_rviz" default="false" doc="The rviz allow for frames visualization"/>
+  <arg name="open_joint_trajectory_controller_gui" default="false" doc="Open rqt gui to control the joints"/>
 
   <!-- send robot urdf to param server -->
   <include file="$(find ur5_simulation)/launch/ur5_upload.launch">
@@ -13,29 +15,46 @@
   </include>
 
   <!-- push robot_description to factory and spawn robot in gazebo -->
-  <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -z 1.02" respawn="false" output="screen" />
+  <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" 
+        args="-urdf -param robot_description -model robot -z 1.02" respawn="false" output="screen" />
 
   <include file="$(find ur_gazebo)/launch/controller_utils.launch"/>
 
   <!-- start this controller -->
   <rosparam file="$(find ur_gazebo)/controller/arm_controller_ur5.yaml" command="load"/>
-  <node name="joint_group_position_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
+  <node name="joint_group_position_controller_spawner" pkg="controller_manager" type="controller_manager"
+        args="spawn arm_controller" respawn="false" output="screen"/>
 
   <rosparam file="$(find ur5_simulation)/config/gripper_controllers.yaml" command="load"/>
-  <node name="finger_joint_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn gripper_$(arg controller_type)_controller" respawn="false" output="screen"/>
+  <node name="finger_joint_controller_spawner" pkg="controller_manager" type="controller_manager"
+        args="spawn gripper_$(arg controller_type)_controller" respawn="false" output="screen"/>
 
   <!-- load other controllers -->
-  <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load joint_group_position_controller" />
+  <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager"
+        respawn="false" output="screen" args="load joint_group_position_controller" />
 
-  <node pkg="tf" type="static_transform_publisher" name="base_link_new_base_linkbroadcaster" args="0 0 0 3.14 0 0 base_link link0 20" />
-  <node pkg="tf" type="static_transform_publisher" name="shoulder_link1_broadcaster" args="0 0 0 3.14 0 0 shoulder_link link1 20" />
-  <node pkg="tf" type="static_transform_publisher" name="shoulder_link2_broadcaster" args="0 0 0 3.14 0 1.57 shoulder_link link2 20" />
-  <node pkg="tf" type="static_transform_publisher" name="forearm_link3_broadcaster" args="0 0 0 1.57 1.57 0 forearm_link link3 20" />
-  <node pkg="tf" type="static_transform_publisher" name="wrist_2_link_link4_broadcaster" args="0 0 0 0 0 -1.57 wrist_2_link link4 20" />
-  <node pkg="tf" type="static_transform_publisher" name="wrist_3_link_link5_broadcaster" args="0 0 0 0 0 0 wrist_3_link link5 20" />
-  <node pkg="tf" type="static_transform_publisher" name="ee_link_link6_broadcaster" args="0 0 0 -1.57 0 -1.57 ee_link link6 20" />
+  <node pkg="tf" type="static_transform_publisher"
+        name="base_link_new_base_linkbroadcaster" args="0 0 0 3.14 0 0 base_link dh_base_link 20" />
+  <node pkg="tf" type="static_transform_publisher"
+        name="shoulder_link1_broadcaster" args="0 0 0 3.14 0 0 shoulder_link link1 20" />
+  <node pkg="tf" type="static_transform_publisher"
+        name="shoulder_link2_broadcaster" args="0 0 0 3.14 0 1.57 shoulder_link link2 20" />
+  <node pkg="tf" type="static_transform_publisher"
+        name="forearm_link3_broadcaster" args="0 0 0 1.57 1.57 0 forearm_link link3 20" />
+  <node pkg="tf" type="static_transform_publisher"
+        name="wrist_2_link_link4_broadcaster" args="0 0 0 0 0 -1.57 wrist_2_link link4 20" />
+  <node pkg="tf" type="static_transform_publisher"
+        name="wrist_3_link_link5_broadcaster" args="0 0 0 0 0 0 wrist_3_link link5 20" />
+  <node pkg="tf" type="static_transform_publisher"
+        name="ee_link_link6_broadcaster" args="0 0 0 -1.57 0 -1.57 ee_link link6 20" />
 
+<group if="$(arg open_rviz)">
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ur5_simulation)/config/ur5.rviz" required="true" />
-  <node name="rqt_joint_trajectory_controller" pkg="rqt_joint_trajectory_controller" type="rqt_joint_trajectory_controller" required="true" output="screen"/>
+</group>
 
+<group if="$(arg open_joint_trajectory_controller_gui)">
+  <node name="rqt_joint_trajectory_controller" pkg="rqt_joint_trajectory_controller"
+        type="rqt_joint_trajectory_controller" required="true" output="screen"/>
+</group>
+  
 </launch>

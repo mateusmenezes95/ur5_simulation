@@ -1,0 +1,24 @@
+base_link_name: dh_base_link  # fixed frame (default: base_link)
+last_link: link6  # frame to get pose in relation to fixed frame (default: link6)
+time_to_complete_movement: 3.0  # time in seconds to the joints complete the movement (default: 2.0)
+# this map each joint state passed in joints sets with ur5 joints
+joints_remap:
+     - shoulder_pan_joint: 0
+     - shoulder_lift_joint: 1
+     - elbow_joint: 2
+     - wrist_1_joint: 3
+     - wrist_2_joint: 4
+     - wrist_3_joint: 5
+
+joints_sets:
+  - [0, -1.57, 0, 0, 0, 1.32]
+  - [1.20, -0.47, 0.73, 0, 0, 1.32]
+  - [0, -1.57, 0, 0, 0, 1.57]
+  - [1.64, -0.45, 0.45, 0, 3.14, 1.57]
+  - [0, -1.57, 0, 0, 0, 1.57]
+  - [1.39, -0.87, 1.41, -0.5, 1.32, 0]
+  - [0, -1.57, 0, 0, 0, 1.57]
+  - [1.39, -0.89, 1.09, -1.78, -1.57, 0]
+  - [0, -1.57, 0, 0, 0, 1.32]
+
+time_step: 5.0 # time between consecutive joints sets (default: 10.0)
