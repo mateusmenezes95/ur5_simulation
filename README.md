@@ -102,7 +102,9 @@ If you want open RViz and the Joint Trajectory controller GUI, run:
 
 ## Example
 
-It was also created in this package a simple node to use the simulation. The node aims to compare the kinematics evaluations provided by the ROS ecosystem and the evaluations done “by hand”, both using the Denavit-Hartenberg notation (this explains the statics tfs put in [ur5.launch](launch/ur5.launch)). It reads from the config a list of joints state to send to the arm controller and get the forward kinematic using the ROS tf2 and the inverse kinematic reading from /joint_states topic. In the end of the algorithm, a chart is generated to show the difference between the kinematic performed by hand and performed in the ROS.
+It was also created in this package a simple node to use the simulation. The node aims to compare the kinematics evaluations provided by the ROS ecosystem and the evaluations done “by hand”, both using the Denavit-Hartenberg notation (this explains the statics tfs put in [ur5.launch](launch/ur5.launch)). It reads from the config a list of joints state to send to the arm controller and get the forward kinematic using the ROS tf2 and the inverse kinematic reading from /joint_states topic. In the end of the algorithm, a chart is generated to show the difference between the kinematic performed by hand and performed in the ROS. The GIF below shows one step of the algorithm.
+
+![GIF Explanation](doc/example_node.gif)
 
 This is just an example of what could be tested using this simulation environment. Feel free to implement your own algorithm.
 
