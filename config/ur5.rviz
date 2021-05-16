@@ -4,14 +4,8 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
-        - /Status1
-        - /RobotModel1
         - /RobotModel1/Links1
         - /RobotModel1/Links1/base_link1/Orientation1
-        - /Axes3
-        - /TF1
-        - /TF1/Frames1
       Splitter Ratio: 0.5323529243469238
     Tree Height: 549
   - Class: rviz/Selection
@@ -87,6 +81,61 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        left_inner_finger:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_inner_finger_pad:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_inner_knuckle:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_outer_finger:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_outer_knuckle:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_inner_finger:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_inner_finger_pad:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_inner_knuckle:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_outer_finger:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        right_outer_knuckle:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        robotiq_arg2f_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         shoulder_link:
           Alpha: 0.4000000059604645
           Show Axes: false
@@ -131,7 +180,7 @@ Visualization Manager:
       Length: 0.10000000149011612
       Name: Axes
       Radius: 0.009999999776482582
-      Reference Frame: link0
+      Reference Frame: dh_base_link
       Value: true
     - Class: rviz/Axes
       Enabled: true
@@ -175,20 +224,6 @@ Visualization Manager:
       Radius: 0.009999999776482582
       Reference Frame: link6
       Value: true
-    - Class: rviz/TF
-      Enabled: false
-      Frame Timeout: 15
-      Frames:
-        All Enabled: false
-      Marker Scale: 1
-      Name: TF
-      Show Arrows: true
-      Show Axes: true
-      Show Names: true
-      Tree:
-        {}
-      Update Interval: 0
-      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -254,4 +289,4 @@ Window Geometry:
     collapsed: true
   Width: 1277
   X: 250
-  Y: 48
+  Y: 0
