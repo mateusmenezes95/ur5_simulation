@@ -4,6 +4,8 @@
 
   <arg name="limited" default="false"  doc="If true, limits joint range [-PI, PI] on all joints." />
   <arg name="controller_type" default="position"  doc="CHoose for effort or position" />
+  <arg name="open_rviz" default="false" doc="The rviz allow for frames visualization"/>
+  <arg name="open_joint_trajectory_controller_gui" default="false" doc="Open rqt gui to control the joints"/>
 
   <!-- send robot urdf to param server -->
   <include file="$(find ur5_simulation)/launch/ur5_upload.launch">
@@ -35,7 +37,12 @@
   <node pkg="tf" type="static_transform_publisher" name="wrist_3_link_link5_broadcaster" args="0 0 0 0 0 0 wrist_3_link link5 20" />
   <node pkg="tf" type="static_transform_publisher" name="ee_link_link6_broadcaster" args="0 0 0 -1.57 0 -1.57 ee_link link6 20" />
 
-  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ur5_simulation)/config/ur5.rviz" required="true" /> -->
-  <!-- <node name="rqt_joint_trajectory_controller" pkg="rqt_joint_trajectory_controller" type="rqt_joint_trajectory_controller" required="true" output="screen"/> -->
+<group if="$(arg open_rviz)">
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ur5_simulation)/config/ur5.rviz" required="true" />
+</group>
+
+<group if="$(arg open_joint_trajectory_controller_gui)">
+  <node name="rqt_joint_trajectory_controller" pkg="rqt_joint_trajectory_controller" type="rqt_joint_trajectory_controller" required="true" output="screen"/>
+</group>
   
 </launch>
