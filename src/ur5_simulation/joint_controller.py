@@ -4,6 +4,7 @@ from sensor_msgs.msg import JointState
 import tf2_ros
 import tf2_geometry_msgs
 import numpy as np
+import sys
 
 class JointController:
     def __init__(self):
@@ -43,11 +44,12 @@ class JointController:
         return H
 
     def __get_joints_state_ordered(self):
+        joints_state_ordered = JointState()
         try:
             joints_state_ordered = rospy.wait_for_message('/joint_states', JointState, timeout=0.5)
-        except ROSException as error:
-            rospy.logerr(error)
-            return
+        except rospy.ROSException as error:
+            rospy.logerr('It was not possible to get joint states: ' + str(error))
+            sys.exit(0)
 
         joints_name = []
         joints_position = []
@@ -99,8 +101,10 @@ class JointController:
             tf = self.__tf_buffer.lookup_transform(source_frame, target_frame, rospy.Time(0))
             return self.__tf_to_homogeneous_matrix(tf)
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as error:
-            rospy.logerr(error)
-            return False
+            rospy.logerr('It was not possible get tf between ' 
+                          + target_frame + ' and ' + source_frame + ':' + str(error))
+            sys.exit(0)
+
 
     def get_last_link_pose(self):
         return self.get_homogeneous_tf(self.__base_link, self.__last_link)
