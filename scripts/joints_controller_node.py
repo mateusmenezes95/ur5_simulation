@@ -21,20 +21,12 @@ if __name__ == '__main__':
         rospy.loginfo('Waiting for simulation time to be non-zero')
         time.sleep(0.1)
 
-    previous_time = rospy.get_time()
-    actual_time = previous_time
-    while actual_time < previous_time + 1:
-        actual_time = rospy.get_time()
-        rospy.loginfo('Waiting for steady simulation time')
-        time.sleep(1)
-
     joint_set_suffix = 0
     joints_set_name = []
     forward_kinematic_errors = np.array([], dtype=float)
     inverse_kinematic_errors = np.array([], dtype=float)
 
     loop_rate = rospy.Rate(1.0 / time_step)
-    complete_movement_rate = rospy.Rate(1.0 / (time_to_complete_movement * 2))
 
     for joint_set in joints_set:
         if not rospy.is_shutdown():
@@ -44,7 +36,7 @@ if __name__ == '__main__':
                 rospy.loginfo('Joints are already in the state given')
             else:
                 joint_controller.set_joints_state(joint_set)
-                complete_movement_rate.sleep()
+                rospy.sleep(time_to_complete_movement * 1.5)
 
             joints_set_name.append('q' + str(joint_set_suffix))
             joint_set_suffix += 1
