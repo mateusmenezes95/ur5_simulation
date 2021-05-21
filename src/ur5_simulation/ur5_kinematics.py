@@ -51,7 +51,7 @@ class UR5Kinematics:
                       [sin(i[0])*sin(i[3]), cos(i[0])*sin(i[3]), cos(i[3]), cos(i[3])*i[1]],
                       [0, 0, 0, 1]])       
  
-    def get_foward_kinematics(self, q=[0, 0, 0, 0, 0, 0], a=0, b=6, short=True):
+    def get_forward_kinematics(self, q=[0, 0, 0, 0, 0, 0], a=0, b=6, short=True):
         
         '''Receives joint angles vector q and outputs transformation
         matrix from link a to b'''

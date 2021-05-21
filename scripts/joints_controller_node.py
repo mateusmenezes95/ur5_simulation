@@ -3,6 +3,7 @@
 import rospy
 from ur5_simulation.joint_controller import JointController
 import ur5_simulation.chart_generation as cg
+from ur5_simulation.ur5_kinematics import UR5Kinematics
 import numpy as np
 import time
 
@@ -10,6 +11,7 @@ if __name__ == '__main__':
     rospy.init_node('joints_controller')
 
     joint_controller = JointController()
+    ur5_kinematics = UR5Kinematics()
     joint_controller.init()
 
     time_step = rospy.get_param('~time_step', 10.0)
@@ -42,7 +44,7 @@ if __name__ == '__main__':
             joint_set_suffix += 1
 
             sim_forward_kinematic = joint_controller.get_last_link_pose()
-            self_forward_kinematic = sim_forward_kinematic + np.random.normal(0, 0.01, sim_forward_kinematic.shape)
+            self_forward_kinematic = ur5_kinematics.get_forward_kinematics(joint_set, short=False)
             forward_kinematic_error = abs(sim_forward_kinematic - self_forward_kinematic).max()
             forward_kinematic_errors = np.append(forward_kinematic_errors, forward_kinematic_error)
 
