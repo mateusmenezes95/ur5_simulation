@@ -32,15 +32,17 @@ if __name__ == '__main__':
 
     for joint_set in joints_set:
         if not rospy.is_shutdown():
-            rospy.loginfo('Command sent: %s' % joint_set)
+            set_name = 'q' + str(joint_set_suffix)
+            rospy.loginfo('Values of %s joint set sent to UR5 controller: %s' % (set_name, joint_set))
 
             if max(abs(joint_set - joint_controller.get_joints_state())) < 0.05:    # avoid unnecessary movement
                 rospy.loginfo('Joints are already in the state given')
             else:
                 joint_controller.set_joints_state(joint_set)
+                rospy.loginfo('Waiting UR5 to complete movement...')
                 rospy.sleep(time_to_complete_movement * 1.5)
 
-            joints_set_name.append('q' + str(joint_set_suffix))
+            joints_set_name.append(set_name)
             joint_set_suffix += 1
 
             sim_forward_kinematic = joint_controller.get_last_link_pose()
@@ -53,9 +55,10 @@ if __name__ == '__main__':
             inverse_kinematic_error = abs(sim_inverse_kinematic - self_inverse_kinematic).max()
             inverse_kinematic_errors = np.append(inverse_kinematic_errors, inverse_kinematic_error)
 
-            joints_state_round = np.around(sim_inverse_kinematic, decimals=2)
-            rospy.loginfo('Last link pose: \n%s' % np.around(sim_forward_kinematic, decimals=2))
-            rospy.loginfo('Joints states: %s' % joints_state_round)
+            rospy.debug('Last link pose from ROS: \n%s' % np.around(sim_forward_kinematic, decimals=2))
+            rospy.debug('Last link pose from self computation: \n%s' % np.around(self_forward_kinematic, decimals=2))
+            rospy.debug('Joints values from ROS: %s' % np.around(sim_inverse_kinematic, decimals=2))
+            rospy.debug('Joints values from Self computation: %s' % np.around(self_inverse_kinematic, decimals=2))
 
             loop_rate.sleep()
 
