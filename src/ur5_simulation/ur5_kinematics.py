@@ -115,7 +115,8 @@ class UR5Kinematics:
         # t14 = inv(t01) @ tf @ inv(t45) @ inv(t56) error
         # Conclusion: the order of multiplication matters!!
 
-        t14 = inv(t01) @ tf @ inv(np.dot(t45,t56)) # transformation matrix from 1 to 4
+        # t14 = inv(t01) @ tf @ inv(np.dot(t45,t56)) # transformation matrix from 1 to 4
+        t14 = np.dot(np.dot(inv(t01),tf),inv(np.dot(t45,t56))) # transformation matrix from 1 to 4
         self._p14_x = t14[0][3]
         self._p14_z = t14[2][3]
         self._p14_xz = (self._p14_x**2 + self._p14_z**2)**0.5
