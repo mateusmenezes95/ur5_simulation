@@ -38,6 +38,8 @@ if __name__ == '__main__':
         rospy.loginfo('Waiting for steady simulation time')
         time.sleep(1)
 
+    joint_controller.open_gripper()
+
     for joint_set_index, joint_set in enumerate(joints_set):
         if not rospy.is_shutdown():
             set_name = 'q' + str(joint_set_index)

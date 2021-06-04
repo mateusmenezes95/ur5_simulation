@@ -9,6 +9,7 @@ import sys
 class JointController:
     def __init__(self):
         self.__joints_cmd_pub = rospy.Publisher('/arm_controller/command', JointTrajectory, queue_size=1)
+        self.__gripper_cmd_pub = rospy.Publisher('/gripper_position_controller/command', JointTrajectory, queue_size=1)
         self.__tf_buffer = tf2_ros.Buffer()
         self.__tf_listener = tf2_ros.TransformListener(self.__tf_buffer)
 
@@ -108,3 +109,22 @@ class JointController:
 
     def get_last_link_pose(self):
         return self.get_homogeneous_tf(self.__base_link, self.__last_link)
+
+    def cmd_gripper(self, percentage):
+        gripper_cmd_msg = JointTrajectory()
+        gripper_cmd_msg.header.stamp = rospy.Time.now()
+        gripper_cmd_msg.joint_names = ['finger_joint']
+
+        point = JointTrajectoryPoint()
+        point.positions = [percentage/100]
+        point.time_from_start.secs = 1.0
+
+        gripper_cmd_msg.points.append(point)
+
+        self.__gripper_cmd_pub.publish(gripper_cmd_msg)
+
+    def open_gripper(self):
+        self.cmd_gripper(1)
+
+    def close_cripper(self):
+        self.cmd_gripper(100)
