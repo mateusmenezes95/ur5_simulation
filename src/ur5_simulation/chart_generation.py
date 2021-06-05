@@ -4,7 +4,8 @@ import numpy as np
 def autolabel(ax, rects):
     for rect in rects:
         height = rect.get_height()
-        ax.text(rect.get_x() + rect.get_width() / 2., (1.02 * height), '%.5f' % height, ha='center', va='bottom')
+        ax.text(rect.get_x() + rect.get_width() / 2., (1.02 * height), '%.5f' % height,
+            ha='center', va='bottom', rotation='vertical')
 
 def generate_diference_between_kinematics_computation(x_labels, forward_kinematic, inverse_kinematic):
     x = np.arange(len(x_labels))  # the label locations
