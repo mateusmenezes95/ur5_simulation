@@ -18,6 +18,7 @@ if __name__ == '__main__':
     time_to_complete_movement = joint_controller.get_time_to_complete_movement()
 
     joints_set = rospy.get_param('~joints_sets')
+    is_to_plot_charts = rospy.get_param('~plot_charts')
 
     while rospy.get_time() < 1:
         rospy.loginfo('Waiting for simulation time to be non-zero')
@@ -82,4 +83,5 @@ if __name__ == '__main__':
     cg.generate_translation_errors(forward_kinematic_translation_errors)
     cg.generate_joints_errors(inverse_kinematic_errors)
 
-    cg.show_charts()
+    if is_to_plot_charts:
+        cg.show_charts()
