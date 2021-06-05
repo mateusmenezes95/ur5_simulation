@@ -23,7 +23,6 @@ if __name__ == '__main__':
         rospy.loginfo('Waiting for simulation time to be non-zero')
         time.sleep(0.1)
 
-    joints_set_name = []
     forward_kinematic_max_errors = np.array([], dtype=float)
     inverse_kinematic_max_errors = np.array([], dtype=float)
     inverse_kinematic_errors = np.zeros(shape=(len(joints_set), len(joints_set[0])))
@@ -42,8 +41,7 @@ if __name__ == '__main__':
 
     for joint_set_index, joint_set in enumerate(joints_set):
         if not rospy.is_shutdown():
-            set_name = 'q' + str(joint_set_index)
-            rospy.loginfo('Values of %s joint set sent to UR5 controller: %s' % (set_name, joint_set))
+            rospy.loginfo('Values of joint set %s sent to UR5 controller: %s' % (joint_set_index, joint_set))
 
             if max(abs(joint_set - joint_controller.get_joints_state())) < 0.05:    # avoid unnecessary movement
                 rospy.loginfo('Joints are already in the state given')
@@ -51,8 +49,6 @@ if __name__ == '__main__':
                 joint_controller.set_joints_state(joint_set)
                 rospy.loginfo('Waiting UR5 to complete movement...')
                 rospy.sleep(time_to_complete_movement * 1.5)
-
-            joints_set_name.append(set_name)
 
             sim_forward_kinematic = joint_controller.get_last_link_pose()
             self_forward_kinematic = ur5_kinematics.get_forward_kinematics(joint_set, short=False)
@@ -68,7 +64,7 @@ if __name__ == '__main__':
             inverse_kinematic_max_error = abs(inverse_kinematic_error).max()
             inverse_kinematic_max_errors = np.append(inverse_kinematic_max_errors, inverse_kinematic_max_error)
 
-            rospy.logdebug('Joints errors of %s set: %s' % (set_name, inverse_kinematic_error))
+            rospy.logdebug('Joints errors of set %s: %s' % (joint_set_index, inverse_kinematic_error))
             rospy.logdebug('Last link pose from ROS: \n%s' % np.around(sim_forward_kinematic, decimals=2))
             rospy.logdebug('Last link pose from self computation: \n%s' % np.around(self_forward_kinematic, decimals=2))
             rospy.logdebug('Joints values from ROS: %s' % np.around(sim_inverse_kinematic, decimals=2))
@@ -76,28 +72,14 @@ if __name__ == '__main__':
 
             loop_rate.sleep()
 
-    joints_set_name = np.array(joints_set_name)
-    rospy.loginfo('Joints sets: %s' % joints_set_name)
     rospy.loginfo('Tranlation x errors %s' % np.round(forward_kinematic_translation_errors[:,0], decimals=5))
     rospy.loginfo('Tranlation y errors %s' % np.round(forward_kinematic_translation_errors[:,1], decimals=5))
     rospy.loginfo('Tranlation z errors %s' % np.round(forward_kinematic_translation_errors[:,2], decimals=5))
     rospy.loginfo('Forward kinematic maximum errors: %s' % np.round(forward_kinematic_max_errors, decimals=2))
     rospy.loginfo('Inverse kinematic maximum errors: %s' % np.round(inverse_kinematic_max_errors, decimals=2))
 
-    cg.generate_diference_between_kinematics_computation(
-        joints_set_name,
-        forward_kinematic_max_errors,
-        inverse_kinematic_max_errors
-    )
-
-    cg.generate_translation_errors(
-        joints_set_name,
-        forward_kinematic_translation_errors
-    )
-
-    cg.generate_joints_errors(
-        joints_set_name,
-        inverse_kinematic_errors
-    )
+    cg.generate_diference_between_kinematics_computation( forward_kinematic_max_errors, inverse_kinematic_max_errors)
+    cg.generate_translation_errors(forward_kinematic_translation_errors)
+    cg.generate_joints_errors(inverse_kinematic_errors)
 
     cg.show_charts()
