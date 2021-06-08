@@ -19,6 +19,10 @@ if __name__ == '__main__':
 
     joints_set = rospy.get_param('~joints_sets')
     is_to_plot_charts = rospy.get_param('~plot_charts')
+    
+    shoulder_position = rospy.get_param('~shoulder_position')
+    elbow_position = rospy.get_param('~elbow_position')
+    wrist_position = rospy.get_param('~wrist_position')
 
     while rospy.get_time() < 1:
         rospy.loginfo('Waiting for simulation time to be non-zero')
@@ -52,15 +56,18 @@ if __name__ == '__main__':
                 rospy.sleep(time_to_complete_movement * 1.5)
 
             sim_forward_kinematic = joint_controller.get_last_link_pose()
-            self_forward_kinematic = ur5_kinematics.get_forward_kinematics(joint_set, short=False)
+            self_forward_kinematic = ur5_kinematics.calculate_forward_kinematics(joint_set, short=False)
             forward_kinematic_max_error = abs(sim_forward_kinematic - self_forward_kinematic).max()
             forward_kinematic_max_errors = np.append(forward_kinematic_max_errors, forward_kinematic_max_error)
             forward_kinematic_translation_error = (sim_forward_kinematic[0:3, 3] - self_forward_kinematic[0:3, 3]).T
             forward_kinematic_translation_errors[joint_set_index] = forward_kinematic_translation_error
 
             sim_inverse_kinematic = joint_controller.get_joints_state()
-            self_inverse_kinematic = joint_controller.get_joints_state() + np.random.normal(0, 0.01, len(joint_set))
-            inverse_kinematic_error = sim_inverse_kinematic - self_inverse_kinematic
+            self_inverse_kinematic = ur5_kinematics.calculate_inverse_kinematics(sim_forward_kinematic, short=False,
+                                                                                 shoulder=shoulder_position,
+                                                                                 elbow=elbow_position,
+                                                                                 wrist=wrist_position)
+            inverse_kinematic_error = np.cos(sim_inverse_kinematic) - np.cos(self_inverse_kinematic)
             inverse_kinematic_errors[joint_set_index] = inverse_kinematic_error
             inverse_kinematic_max_error = abs(inverse_kinematic_error).max()
             inverse_kinematic_max_errors = np.append(inverse_kinematic_max_errors, inverse_kinematic_max_error)
