@@ -87,22 +87,41 @@ class UR5Kinematics:
 
         return self._teta1
         
-    def _calculate_teta_5(self, tf, wrist='up'):
+    def _calculate_teta_5(self, tf, wrist='down'):
         p06_x = tf[0][3]
         p06_y = tf[1][3]
-        self._teta5 = acos((p06_x*sin(self._teta1) - p06_y*cos(self._teta1) - self.__d4)/self.__d6)
+        num = p06_x*sin(self._teta1) - p06_y*cos(self._teta1) - self.__d4
+        if abs(num) >= self.__d6 and num > 0:
+            self._teta5 = 0        
+        elif abs(num) >= self.__d6 and num < 0:
+            self._teta5 = pi
+        else:
+            self._teta5 = acos(num/self.__d6)
 
-        if wrist == 'down':
+        if wrist == 'up':
             self._teta5 *= -1 
 
         return self._teta5
 
     def _calculate_teta_6(self, tf):
+        if sin(self._teta5) == 0: # indetermination
+            self._teta6 = 0
+            return self._teta6
         t60 = inv(tf) # transformation matrix from 6 to 0
-        y = (-t60[1][0]*sin(self._teta1) + t60[1][1]*cos(self._teta1))/sin(self._teta5)
-        x = (t60[0][0]*sin(self._teta1) - t60[0][1]*cos(self._teta1))/sin(self._teta5)
+        num_y = -t60[1][0]*sin(self._teta1) + t60[1][1]*cos(self._teta1) # y numerator
+        # print(f'num_y ={num_y}')
+        num_x = t60[0][0]*sin(self._teta1) - t60[0][1]*cos(self._teta1) # x numerator
+        # print(f'num_x ={num_x}')
+        if num_y == 0 and num_x == 0: # another indetermination
+            self._teta6 = 0
+            return self._teta6   
+        y = num_y/sin(self._teta5)
+        # print(f'y ={y}')
+        x = num_x/sin(self._teta5)
+        # print(f'x ={x}')
         self._teta6 = atan2(y,x)
-
+        # print(f'teta 1 = {self._teta1}')
+        # print(f'teta 6 = {self._teta6}')
         return self._teta6   
 
     def _calculate_teta_3(self, tf, elbow ='up'):
@@ -116,11 +135,17 @@ class UR5Kinematics:
         # Conclusion: the order of multiplication matters!!
 
         # t14 = inv(t01) @ tf @ inv(np.dot(t45,t56)) # transformation matrix from 1 to 4
-        t14 = np.dot(np.dot(inv(t01),tf),inv(np.dot(t45,t56))) # transformation matrix from 1 to 4
+        t14 = np.dot(np.dot(inv(t01),tf),inv(np.dot(t45,t56))) # transformation matrix from 1 to 4 REWRITE
         self._p14_x = t14[0][3]
         self._p14_z = t14[2][3]
         self._p14_xz = (self._p14_x**2 + self._p14_z**2)**0.5
-        self._teta3 = acos((self._p14_xz**2 - self.__a2**2 - self.__a3**2)/(2*self.__a2*self.__a3))
+        div = (self._p14_xz**2 - self.__a2**2 - self.__a3**2)/(2*self.__a2*self.__a3)
+        if div < -1:
+            self._teta3 = pi
+        elif div > 1:
+            self._teta3 = 0
+        else:
+            self._teta3 = acos(div)
 
         if elbow == 'down':
             self._teta3 *= -1 
@@ -141,11 +166,11 @@ class UR5Kinematics:
 
         return self._teta4
 
-    def calculate_inverse_kinematics(self, tf, shoulder='left', wrist='up', elbow='up', short=True):
-        q1 = self._calculate_teta_1(tf, shoulder)
-        q5 = self._calculate_teta_5(tf, wrist)
+    def calculate_inverse_kinematics(self, tf, shoulder='left', wrist='down', elbow='up', short=True):
+        q1 = self._calculate_teta_1(tf, shoulder=shoulder)
+        q5 = self._calculate_teta_5(tf, wrist=wrist)
         q6 = self._calculate_teta_6(tf)
-        q3 = self._calculate_teta_3(tf, elbow)
+        q3 = self._calculate_teta_3(tf, elbow=elbow)
         q2 = self._calculate_teta_2(tf)
         q4 = self._calculate_teta_4(tf)
 
@@ -157,15 +182,30 @@ class UR5Kinematics:
 
         return q
 
-def main():
-    r = UR5Kinematics()
-    q = [0.2, 0.5, 1.5, 0.3, 1.1, 0.5]
-    tf = r.calculate_forward_kinematics(q)
-    print(f'tf = \n{tf}')
-    print('')
-    print(r._dh_matrix)
-    print('')
-    print(f'q = {r.calculate_inverse_kinematics(tf)}')
+# def main():
 
-if __name__ == '__main__':
-    main()
+    # joints_sets to test code:
+    # q_list = [[0, -1.57, 0, 0, 0, 1.32],
+    #     [1.20, -0.47, 0.73, 0, 0, 1.32],
+    #     [0, -1.57, 0, 0, 0, 1.57],
+    #     [1.64, -0.45, 0.45, 0, 3.14, 1.57],
+    #     [0, -1.57, 0, 0, 0, 1.57],
+    #     [1.39, -0.87, 1.41, -0.5, 1.32, 0],
+    #     [0, -1.57, 0, 0, 0, 1.57],
+    #     [1.39, -0.89, 1.09, -1.78, -1.57, 0],
+    #     [0, -1.57, 0, 0, 0, 1.32]]
+    # r = UR5Kinematics()
+    # for q in q_list:        
+    #     tf = r.calculate_forward_kinematics(q)
+    #     print(f'\nfor q = {q}:')
+    #     print(f'\ntf:\n{tf}')
+    #     print(f'\nDH matrix:\n{r._dh_matrix}')
+    #     print(f'\nCalculated inverse matrix from DH matrix:\n{r.calculate_inverse_kinematics(tf)}')
+    #     print('-='*30)
+
+# if __name__ == '__main__':
+#     main()
+
+# r = UR5Kinematics()
+# q = [0, 0, 0, 0, 0, 0]
+# tf = r.calculate_forward_kinematics()
