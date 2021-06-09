@@ -1,14 +1,17 @@
 import rospy
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+from cubic_polynomial_planner import CubicPolynomialPlanner
+from lspb_planner import LSPBPlanner
 from sensor_msgs.msg import JointState
+from std_msgs.msg import Float64MultiArray
 import tf2_ros
 import tf2_geometry_msgs
 import numpy as np
 import sys
 
-class JointController:
+class JointPositionController:
     def __init__(self):
-        self.__joints_cmd_pub = rospy.Publisher('/arm_controller/command', JointTrajectory, queue_size=1)
+        self.__joints_cmd_pub = rospy.Publisher('/joint_group_position_controller/command', Float64MultiArray, queue_size=1)
         self.__gripper_cmd_pub = rospy.Publisher('/gripper_position_controller/command', JointTrajectory, queue_size=1)
         self.__tf_buffer = tf2_ros.Buffer()
         self.__tf_listener = tf2_ros.TransformListener(self.__tf_buffer)
@@ -82,15 +85,8 @@ class JointController:
             rospy.logwarn('Required %d joints. %d was given ' % (num_joints, q_len))
             return
 
-        joints_cmd = JointTrajectory()
-        joints_cmd.header.stamp = rospy.Time.now()
-        joints_cmd.joint_names = joints_name
-
-        point = JointTrajectoryPoint()
-        point.positions = q
-        point.time_from_start = rospy.Duration(self.__time_to_complete_movement)
-
-        joints_cmd.points.append(point)
+        joints_cmd = Float64MultiArray()
+        joints_cmd.data = q
 
         self.__joints_cmd_pub.publish(joints_cmd)
 
