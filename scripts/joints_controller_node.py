@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
             sim_forward_kinematic = joint_controller.get_last_link_pose()
             self_forward_kinematic = ur5_kinematics.calculate_forward_kinematics(joint_set, short=False)
-            forward_kinematic_max_error = abs(sim_forward_kinematic - self_forward_kinematic).max()
+            forward_kinematic_max_error = (abs(sim_forward_kinematic) - abs(self_forward_kinematic)).max()
             forward_kinematic_max_errors = np.append(forward_kinematic_max_errors, forward_kinematic_max_error)
             forward_kinematic_translation_error = (sim_forward_kinematic[0:3, 3] - self_forward_kinematic[0:3, 3]).T
             forward_kinematic_translation_errors[joint_set_index] = forward_kinematic_translation_error
