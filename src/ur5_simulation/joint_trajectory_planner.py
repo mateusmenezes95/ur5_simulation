@@ -10,15 +10,13 @@ class JointTrajectoryPlanner(object):
         self._time_i = time_i
         self._time_f = time_f
         self._movement_duration = movement_duration
-        print('Final time is ', time_f)
-        print('Movement duration is ', movement_duration)
 
         if movement_duration is None and time_f is None:
             raise AttributeError("Either final time or movement duration " + 
                                  "shall be passed in " +
                                  "JointTrajectoryPlanner constructor")
         elif movement_duration is None:
-            self._movement_duration = time_f - time_i
+            self.movement_duration = time_f - time_i
         elif time_f is None:
             self._time_f = time_i + movement_duration
 

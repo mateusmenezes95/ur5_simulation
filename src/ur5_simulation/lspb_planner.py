@@ -2,17 +2,25 @@ from joint_trajectory_planner import JointTrajectoryPlanner
 import numpy as np
 
 class LSPBPlanner(JointTrajectoryPlanner):
-    def __init__(self, pos_i, pos_f, blend_time, desired_velocity, time_i = 0.0,
+    def __init__(self, pos_i, pos_f, desired_velocity, time_i = 0.0,
                  time_step = 0.1, time_f = None, movement_duration = None):
 
         self._movement_duration = time_f - time_i
-        if 2 * blend_time > self._movement_duration:
-            raise AttributeError("Blend time shall be less then half of " +
-                                 "movement duration." )
+        displacement = pos_f - pos_i
+        minumum_velocity = displacement/self._movement_duration
+        maximum_velocity = 2*(-displacement)/self._movement_duration
+        if desired_velocity >= maximum_velocity and \
+           desired_velocity < minumum_velocity:
+            raise AttributeError("Velocity shall be less then {} and higher " +
+                                 "than {}.".format(maximum_velocity, 
+                                                   minumum_velocity))
         
-        self._blend_time = blend_time
+        self._blend_time = (pos_i - pos_f + 
+                            desired_velocity * self._movement_duration) \
+                            / desired_velocity
+
         self._desired_velocity = desired_velocity
-        self._acceleration = desired_velocity / blend_time
+        self._acceleration = desired_velocity / self._blend_time
         self._pos_i = pos_i
         self._pos_f = pos_f
 
