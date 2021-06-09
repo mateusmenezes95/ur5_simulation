@@ -17,8 +17,14 @@ if __name__ == '__main__':
     time_step = rospy.get_param('~time_step', 10.0)
     time_to_complete_movement = joint_controller.get_time_to_complete_movement()
 
-    joints_set = rospy.get_param('~joints_sets')
     is_to_plot_charts = rospy.get_param('~plot_charts')
+    
+    set_picked = 'set_' + str(rospy.get_param('~set_to_pick'))
+    dataset_pam = rospy.get_param('~datasets')
+    shoulder_position = dataset_pam[set_picked]['shoulder_position']
+    elbow_position = dataset_pam[set_picked]['elbow_position']
+    wrist_position = dataset_pam[set_picked]['wrist_position']
+    joints_set_list = dataset_pam[set_picked]['joints_set_list']
 
     while rospy.get_time() < 1:
         rospy.loginfo('Waiting for simulation time to be non-zero')
@@ -26,8 +32,8 @@ if __name__ == '__main__':
 
     forward_kinematic_max_errors = np.array([], dtype=float)
     inverse_kinematic_max_errors = np.array([], dtype=float)
-    inverse_kinematic_errors = np.zeros(shape=(len(joints_set), len(joints_set[0])))
-    forward_kinematic_translation_errors = np.zeros(shape=(len(joints_set), 3))
+    inverse_kinematic_errors = np.zeros(shape=(len(joints_set_list), len(joints_set_list[0])))
+    forward_kinematic_translation_errors = np.zeros(shape=(len(joints_set_list), 3))
 
     loop_rate = rospy.Rate(1.0 / time_step)
 
@@ -40,7 +46,7 @@ if __name__ == '__main__':
 
     joint_controller.open_gripper()
 
-    for joint_set_index, joint_set in enumerate(joints_set):
+    for joint_set_index, joint_set in enumerate(joints_set_list):
         if not rospy.is_shutdown():
             rospy.loginfo('Values of joint set %s sent to UR5 controller: %s' % (joint_set_index, joint_set))
 
@@ -52,15 +58,18 @@ if __name__ == '__main__':
                 rospy.sleep(time_to_complete_movement * 1.5)
 
             sim_forward_kinematic = joint_controller.get_last_link_pose()
-            self_forward_kinematic = ur5_kinematics.get_forward_kinematics(joint_set, short=False)
-            forward_kinematic_max_error = abs(sim_forward_kinematic - self_forward_kinematic).max()
+            self_forward_kinematic = ur5_kinematics.calculate_forward_kinematics(joint_set, short=False)
+            forward_kinematic_max_error = (abs(sim_forward_kinematic) - abs(self_forward_kinematic)).max()
             forward_kinematic_max_errors = np.append(forward_kinematic_max_errors, forward_kinematic_max_error)
             forward_kinematic_translation_error = (sim_forward_kinematic[0:3, 3] - self_forward_kinematic[0:3, 3]).T
             forward_kinematic_translation_errors[joint_set_index] = forward_kinematic_translation_error
 
             sim_inverse_kinematic = joint_controller.get_joints_state()
-            self_inverse_kinematic = joint_controller.get_joints_state() + np.random.normal(0, 0.01, len(joint_set))
-            inverse_kinematic_error = sim_inverse_kinematic - self_inverse_kinematic
+            self_inverse_kinematic = ur5_kinematics.calculate_inverse_kinematics(sim_forward_kinematic, short=False,
+                                                                                 shoulder=shoulder_position,
+                                                                                 elbow=elbow_position,
+                                                                                 wrist=wrist_position)
+            inverse_kinematic_error = np.cos(sim_inverse_kinematic) - np.cos(self_inverse_kinematic)
             inverse_kinematic_errors[joint_set_index] = inverse_kinematic_error
             inverse_kinematic_max_error = abs(inverse_kinematic_error).max()
             inverse_kinematic_max_errors = np.append(inverse_kinematic_max_errors, inverse_kinematic_max_error)
