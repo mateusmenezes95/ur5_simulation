@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 import rospy
+import rospkg
 from ur5_simulation.joint_controller import JointController
 import ur5_simulation.chart_generation as cg
 from ur5_simulation.ur5_kinematics import UR5Kinematics
 import numpy as np
 import time
+import os.path
 
 if __name__ == '__main__':
     rospy.init_node('joints_controller')
@@ -18,6 +20,7 @@ if __name__ == '__main__':
     time_to_complete_movement = joint_controller.get_time_to_complete_movement()
 
     is_to_plot_charts = rospy.get_param('~plot_charts')
+    is_to_write_poses_file = rospy.get_param('~write_poses_list_file')
     
     set_picked = 'set_' + str(rospy.get_param('~set_to_pick'))
     dataset_pam = rospy.get_param('~datasets')
@@ -25,6 +28,7 @@ if __name__ == '__main__':
     elbow_position = dataset_pam[set_picked]['elbow_position']
     wrist_position = dataset_pam[set_picked]['wrist_position']
     joints_set_list = dataset_pam[set_picked]['joints_set_list']
+    poses_set_list = dataset_pam[set_picked]['poses_set_list']
 
     while rospy.get_time() < 1:
         rospy.loginfo('Waiting for simulation time to be non-zero')
@@ -34,6 +38,7 @@ if __name__ == '__main__':
     inverse_kinematic_max_errors = np.array([], dtype=float)
     inverse_kinematic_errors = np.zeros(shape=(len(joints_set_list), len(joints_set_list[0])))
     forward_kinematic_translation_errors = np.zeros(shape=(len(joints_set_list), 3))
+    end_effector_poses = []
 
     loop_rate = rospy.Rate(1.0 / time_step)
 
@@ -58,6 +63,7 @@ if __name__ == '__main__':
                 rospy.sleep(time_to_complete_movement * 1.5)
 
             sim_forward_kinematic = joint_controller.get_last_link_pose()
+            end_effector_poses.append(sim_forward_kinematic.tolist())
             self_forward_kinematic = ur5_kinematics.calculate_forward_kinematics(joint_set, short=False)
             forward_kinematic_max_error = (abs(sim_forward_kinematic) - abs(self_forward_kinematic)).max()
             forward_kinematic_max_errors = np.append(forward_kinematic_max_errors, forward_kinematic_max_error)
@@ -91,6 +97,21 @@ if __name__ == '__main__':
     cg.generate_diference_between_kinematics_computation( forward_kinematic_max_errors, inverse_kinematic_max_errors)
     cg.generate_translation_errors(forward_kinematic_translation_errors)
     cg.generate_joints_errors(inverse_kinematic_errors)
+
+    rospack = rospkg.RosPack()
+    pkg_path = rospack.get_path('ur5_simulation')
+
+    if is_to_write_poses_file:
+        with open(os.path.join(pkg_path, 'config/poses_list.txt') , 'w') as poses_list_txt:
+            for pose_num, end_effector_pose in enumerate(end_effector_poses):
+                poses_list_txt.write('- [')
+                for row_num, row in enumerate(end_effector_pose):
+                    if row_num == 0:
+                        poses_list_txt.write(str(row) + ',\n')
+                    elif row_num == 3:
+                        poses_list_txt.write('   ' + str(row) + '] # ' + str(pose_num) + '\n')
+                    else:
+                        poses_list_txt.write('   ' + str(row) + ',\n')
 
     if is_to_plot_charts:
         cg.show_charts()
