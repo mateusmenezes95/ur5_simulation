@@ -10,6 +10,9 @@ import numpy as np
 from math import acos, asin, atan2, cos, sin, pi
 from numpy.linalg import inv
 
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
 class UR5Kinematics:
         
     def __init__(self, d1=0.089159, a2=-0.42500, a3=-0.39225, d4=0.1091,
@@ -19,7 +22,9 @@ class UR5Kinematics:
         self.__a3 = a3
         self.__d4 = d4
         self.__d5 = d5
-        self.__d6 = d6 
+        self.__d6 = d6
+
+        self.__zero_tolerance = 0.01
         
         self._teta1, self._teta2, self._teta3, self._teta4, self._teta5, self._teta6 = (0,0,0,0,0,0)
         
@@ -73,6 +78,10 @@ class UR5Kinematics:
 
     ##############  INVERSE KINEMATICS CALCULATION  ############## 
 
+    def set_zero_tolerance(self, tolerance):
+        if tolerance > 0:
+            self.__zero_tolerance = tolerance
+
     def _calculate_teta_1(self, tf, shoulder='left'):
         p05 = np.dot(tf, np.array([[0],[0],[-self.__d6],[1]])) # origin 5 in respect to 1
         p05_x = p05[0][0]
@@ -104,7 +113,7 @@ class UR5Kinematics:
         return self._teta5
 
     def _calculate_teta_6(self, tf):
-        if sin(self._teta5) == 0: # indetermination
+        if isclose(sin(self._teta5), 0, abs_tol=self.__zero_tolerance): # indetermination
             self._teta6 = 0
             return self._teta6
         t60 = inv(tf) # transformation matrix from 6 to 0
@@ -112,7 +121,8 @@ class UR5Kinematics:
         # print(f'num_y ={num_y}')
         num_x = t60[0][0]*sin(self._teta1) - t60[0][1]*cos(self._teta1) # x numerator
         # print(f'num_x ={num_x}')
-        if num_y == 0 and num_x == 0: # another indetermination
+        if (isclose(num_y, 0, abs_tol=self.__zero_tolerance) and 
+            isclose(num_x, 0, abs_tol=self.__zero_tolerance)): # another indetermination
             self._teta6 = 0
             return self._teta6   
         y = num_y/sin(self._teta5)
