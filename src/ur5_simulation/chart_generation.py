@@ -2,10 +2,13 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 def autolabel(ax, rects):
+    max_height = 0
     for rect in rects:
         height = rect.get_height()
-        ax.text(rect.get_x() + rect.get_width() / 2., (height + 0.01), '%.5f' % height,
+        max_height = max(height, max_height)
+        ax.text(rect.get_x() + rect.get_width() / 2., (height * 1.05), '%.5f' % height,
             ha='center', va='bottom', rotation='vertical')
+    return max_height
 
 def generate_diference_between_kinematics_computation(forward_kinematic, inverse_kinematic):
     x = np.arange(forward_kinematic.shape[0])
@@ -18,11 +21,13 @@ def generate_diference_between_kinematics_computation(forward_kinematic, inverse
     ax.set_title('Maximos erros dos calculos de cinematica direta e inversa')
     ax.set_xticks(x)
     ax.set_xlabel('Indice do conjunto de valores de juntas')
-    ax.set_ylabel('Erro [m ou rad]')
+    ax.set_ylabel('Erro absoluto')
     ax.legend()
 
-    autolabel(ax, rects1)
-    autolabel(ax, rects2)
+    max_rect1_height = autolabel(ax, rects1)
+    max_rect2_height = autolabel(ax, rects2)
+
+    ax.set_ylim([0, max(max_rect2_height*1.3, max_rect1_height*1.3)])
 
     fig.tight_layout()
 
@@ -53,7 +58,7 @@ def generate_joints_errors(joints_errors):
     ax.set_title('Erros do angulo das juntas')
     ax.set_xticks(x)
     ax.set_xlabel('Indice do conjunto de valores de juntas')
-    ax.set_ylabel('Erro [rad]')
+    ax.set_ylabel('Erro absoluto dos cossenos')
     ax.legend(['junta 1', 'junta 2', 'junta 3', 'junta 4', 'junta 5', 'junta 6'])
     ax.grid(alpha=0.2)
     # ax.set_xlim([0, len(x) - 1])
