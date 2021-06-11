@@ -2,6 +2,7 @@ import abc
 import rospy
 import numpy as np
 import matplotlib.pyplot as plt
+import math 
 
 class JointTrajectoryPlanner(object):
     def __init__(self, time_i = 0.0, time_step = 0.1, time_f = None,
@@ -25,6 +26,7 @@ class JointTrajectoryPlanner(object):
 
         (self._position_profile, self._velocity_profile,
          self._acceleration_profile) = self.generate_profiles()
+
 
     def generate_profiles(self):
         return (self.generate_position_profile(),
@@ -94,3 +96,15 @@ class JointTrajectoryPlanner(object):
         fig.tight_layout()
         fig.show()
         
+
+def normalize_angle(angle):
+    if angle > math.pi:
+        return angle - 2 * math.pi
+    elif angle < - math.pi:
+        return angle + 2 * math.pi
+    else:
+        return angle
+
+
+def calculate_displacement(pos_i, pos_f):
+    return normalize_angle(pos_f - pos_i)

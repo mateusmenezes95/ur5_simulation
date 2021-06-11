@@ -4,6 +4,9 @@ import numpy as np
 class CubicPolynomialPlanner(JointTrajectoryPlanner):
     def __init__(self, pos_i, pos_f, vel_i, vel_f, movement_duration = None,
                  time_f = None, time_i = 0.0, time_step = 0.1):
+        # type: (float, float, float, float, float, float, float, float) -> None
+        self._movement_duration = movement_duration
+        self._time_f = time_f        
         if movement_duration is None and time_f is None:
             raise AttributeError("Either final time or movement duration " + 
                                  "shall be passed in " +
@@ -13,6 +16,7 @@ class CubicPolynomialPlanner(JointTrajectoryPlanner):
         elif time_f is None:
             self._time_f = time_i + movement_duration
 
+        time_f = self._time_f
         linear_system = np.array([[1., time_i, time_i**2, time_i**3],
                                   [0., 1., 2*time_i, 3*time_i**2],
                                   [1., time_f, time_f**2, time_f**3],
@@ -27,8 +31,7 @@ class CubicPolynomialPlanner(JointTrajectoryPlanner):
 
     def generate_position_profile(self):
         position_profile = []
-        for t_current in self._timespan:
-            t = t_current - self._time_i
+        for t in self._timespan:
             position_profile.append(
                 self._a[0] + self._a[1]*t + self._a[2]*t**2 + self._a[3] *t**3)
         position_profile = np.around(position_profile, 8)
@@ -37,8 +40,7 @@ class CubicPolynomialPlanner(JointTrajectoryPlanner):
 
     def generate_velocity_profile(self):
         velocity_profile = []
-        for t_current in self._timespan:
-            t = t_current - self._time_i
+        for t in self._timespan:
             velocity_profile.append(
                 self._a[1] + 2*self._a[2]*t + 3*self._a[3]*t**2)
         velocity_profile = np.around(velocity_profile, 8)
@@ -47,8 +49,7 @@ class CubicPolynomialPlanner(JointTrajectoryPlanner):
 
     def generate_acceleration_profile(self):
         acceleration_profile = []
-        for t_current in self._timespan:
-            t = t_current - self._time_i
+        for t in self._timespan:
             acceleration_profile.append(2*self._a[2] + 6*self._a[3]*t)
         acceleration_profile = np.around(acceleration_profile, 8)
         return acceleration_profile

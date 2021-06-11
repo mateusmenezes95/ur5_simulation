@@ -74,21 +74,51 @@ class JointPositionController:
 
         return joints_state_ordered
 
-    def set_joints_state(self, q):
+    def set_joints_state(self, q, movement_duration, joint_velocity, sample_period, joint_controller_type):
         joints_name = self.__get_joints_state_ordered().name
-
+        time_i = rospy.Time.now().to_sec()
+        current_joint_states = self.get_joints_state()
         q_len = len(q)
-        num_joints = len(joints_name)
+        planners = [None]*q_len
+        for joint_index, joint in enumerate(q):
+            if (joint_controller_type == "lspb"):
+                planners[joint_index] = LSPBPlanner(pos_i = current_joint_states[joint_index],
+                                                    pos_f = joint, 
+                                                    desired_velocity =joint_velocity,
+                                                    time_i = time_i, 
+                                                    movement_duration = movement_duration,
+                                                    time_step = sample_period)
+            elif (joint_controller_type == "cubic_polynomial"):
+                planners[joint_index] = CubicPolynomialPlanner(pos_i = current_joint_states[joint_index],
+                                                               pos_f = joint, 
+                                                               vel_i =0.0, vel_f =0.0,
+                                                               time_i = time_i, 
+                                                               movement_duration = movement_duration,
+                                                               time_step = sample_period)
+               
 
-        if q_len != num_joints:
-            rospy.logwarn('Joint set not accepted: Number of joints to control is diferent of robot''s joints number')
-            rospy.logwarn('Required %d joints. %d was given ' % (num_joints, q_len))
-            return
+            # print("pos_i = {}".format(current_joint_states[joint_index])) 
+            # print("pos_f = {}".format(joint)) 
+            # print("desired_velocity = {}".format(joint_velocity)) 
+            # print("time_i = {}".format(time_i)) 
+            # print("movement_duration = {}".format(movement_duration)) 
+            # print("time_step = {}".format(sample_period)) 
+            # planners[joint_index].plot_position_profile()
+        
+        if joint_controller_type == "lspb" or joint_controller_type == "cubic_polynomial":
+            while rospy.Time.now().to_sec() < time_i + movement_duration:
+                current_time = rospy.Time.now().to_sec()
+                joints_cmd = Float64MultiArray() 
+                for planner in planners:
+                    joints_cmd.data.append(planner.get_position_at(current_time))
+                self.__joints_cmd_pub.publish(joints_cmd)
+                rospy.sleep(sample_period)
+        else:
+            joints_cmd = Float64MultiArray() 
+            joints_cmd.data = q
+            self.__joints_cmd_pub.publish(joints_cmd)
+            rospy.sleep(self.__time_to_complete_movement)
 
-        joints_cmd = Float64MultiArray()
-        joints_cmd.data = q
-
-        self.__joints_cmd_pub.publish(joints_cmd)
 
     def get_joints_state(self):
         return np.array(self.__get_joints_state_ordered().position)
@@ -112,8 +142,8 @@ class JointPositionController:
         gripper_cmd_msg.joint_names = ['finger_joint']
 
         point = JointTrajectoryPoint()
-        point.positions = [percentage/100]
-        point.time_from_start.secs = 1.0
+        point.positions = [percentage/100.]
+        point.time_from_start.secs = 3.0
 
         gripper_cmd_msg.points.append(point)
 
@@ -123,4 +153,4 @@ class JointPositionController:
         self.cmd_gripper(1)
 
     def close_gripper(self):
-        self.cmd_gripper(100)
+        self.cmd_gripper(10)
